@@ -53,7 +53,7 @@ class Marker
   Section: Construction and Destruction
   ###
 
-  constructor: ({@bufferMarker, @displayBuffer}) ->
+  constructor: (@bufferMarker, @layer) ->
     @emitter = new Emitter
     @disposables = new CompositeDisposable
     @id = @bufferMarker.id
@@ -81,7 +81,7 @@ class Marker
   #
   # Returns a {Marker}.
   copy: (properties) ->
-    @displayBuffer.getMarker(@bufferMarker.copy(properties).id)
+    @layer.getMarker(@bufferMarker.copy(properties).id)
 
   ###
   Section: Event Subscription
@@ -169,7 +169,7 @@ class Marker
     @bufferMarker.setProperties(properties)
 
   matchesProperties: (attributes) ->
-    attributes = @displayBuffer.translateToBufferMarkerParams(attributes)
+    attributes = @layer.translateToBufferMarkerParams(attributes)
     @bufferMarker.matchesParams(attributes)
 
   ###
@@ -214,7 +214,7 @@ class Marker
   #
   # Returns a {Range}.
   getScreenRange: ->
-    @displayBuffer.screenRangeForBufferRange(@getBufferRange(), wrapAtSoftNewlines: true)
+    @layer.screenRangeForBufferRange(@getBufferRange(), wrapAtSoftNewlines: true)
 
   # Essential: Modifies the screen range of the display marker.
   #
@@ -222,7 +222,7 @@ class Marker
   # * `properties` (optional) {Object} properties to associate with the marker.
   #   * `reversed` {Boolean} If true, the marker will to be in a reversed orientation.
   setScreenRange: (screenRange, options) ->
-    @setBufferRange(@displayBuffer.bufferRangeForScreenRange(screenRange), options)
+    @setBufferRange(@layer.bufferRangeForScreenRange(screenRange), options)
 
   # Essential: Retrieves the buffer position of the marker's start. This will always be
   # less than or equal to the result of {Marker::getEndBufferPosition}.
@@ -236,7 +236,7 @@ class Marker
   #
   # Returns a {Point}.
   getStartScreenPosition: ->
-    @displayBuffer.screenPositionForBufferPosition(@getStartBufferPosition(), wrapAtSoftNewlines: true)
+    @layer.screenPositionForBufferPosition(@getStartBufferPosition(), wrapAtSoftNewlines: true)
 
   # Essential: Retrieves the buffer position of the marker's end. This will always be
   # greater than or equal to the result of {Marker::getStartBufferPosition}.
@@ -250,7 +250,7 @@ class Marker
   #
   # Returns a {Point}.
   getEndScreenPosition: ->
-    @displayBuffer.screenPositionForBufferPosition(@getEndBufferPosition(), wrapAtSoftNewlines: true)
+    @layer.screenPositionForBufferPosition(@getEndBufferPosition(), wrapAtSoftNewlines: true)
 
   # Extended: Retrieves the buffer position of the marker's head.
   #
@@ -269,14 +269,14 @@ class Marker
   #
   # Returns a {Point}.
   getHeadScreenPosition: ->
-    @displayBuffer.screenPositionForBufferPosition(@getHeadBufferPosition(), wrapAtSoftNewlines: true)
+    @layer.screenPositionForBufferPosition(@getHeadBufferPosition(), wrapAtSoftNewlines: true)
 
   # Extended: Sets the screen position of the marker's head.
   #
   # * `screenPosition` The new {Point} to use
   # * `properties` (optional) {Object} properties to associate with the marker.
   setHeadScreenPosition: (screenPosition, properties) ->
-    @setHeadBufferPosition(@displayBuffer.bufferPositionForScreenPosition(screenPosition, properties))
+    @setHeadBufferPosition(@layer.bufferPositionForScreenPosition(screenPosition, properties))
 
   # Extended: Retrieves the buffer position of the marker's tail.
   #
@@ -295,14 +295,14 @@ class Marker
   #
   # Returns a {Point}.
   getTailScreenPosition: ->
-    @displayBuffer.screenPositionForBufferPosition(@getTailBufferPosition(), wrapAtSoftNewlines: true)
+    @layer.screenPositionForBufferPosition(@getTailBufferPosition(), wrapAtSoftNewlines: true)
 
   # Extended: Sets the screen position of the marker's tail.
   #
   # * `screenPosition` The new {Point} to use
   # * `properties` (optional) {Object} properties to associate with the marker.
   setTailScreenPosition: (screenPosition, options) ->
-    @setTailBufferPosition(@displayBuffer.bufferPositionForScreenPosition(screenPosition, options))
+    @setTailBufferPosition(@layer.bufferPositionForScreenPosition(screenPosition, options))
 
   # Extended: Returns a {Boolean} indicating whether the marker has a tail.
   hasTail: ->
@@ -333,7 +333,7 @@ class Marker
     "Marker(id: #{@id}, bufferRange: #{@getBufferRange()})"
 
   destroyed: ->
-    delete @displayBuffer.markers[@id]
+    delete @layer.markers[@id]
     @emitter.emit 'did-destroy'
     @emitter.dispose()
 

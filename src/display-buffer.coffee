@@ -58,6 +58,13 @@ class DisplayBuffer extends Model
     @overlayDecorationsById = {}
     @disposables.add @tokenizedBuffer.observeGrammar @subscribeToScopedConfigSettings
     @disposables.add @tokenizedBuffer.onDidChange @handleTokenizedBufferChange
+
+    if params.defaultBufferMarkerLayerId
+      @defaultBufferMarkerLayer = @buffer.getMarkerLayer(params.defaultBufferMarkerLayerId)
+    else
+      @defaultBufferMarkerLayer = @buffer.addMarkerLayer()
+    @defaultMarkerLayer = new MarkerLayer(this, @defaultBufferMarkerLayer)
+
     @disposables.add @buffer.onDidCreateMarker @handleBufferMarkerCreated
     @disposables.add @buffer.onDidUpdateMarkers => @emitter.emit 'did-update-markers'
     @foldMarkerAttributes = Object.freeze({class: 'fold', displayBufferId: @id})
@@ -821,9 +828,8 @@ class DisplayBuffer extends Model
   # options - Options to pass to the {Marker} constructor
   #
   # Returns a {Number} representing the new marker's ID.
-  markScreenRange: (args...) ->
-    bufferRange = @bufferRangeForScreenRange(args.shift())
-    @markBufferRange(bufferRange, args...)
+  markScreenRange: (range, options) ->
+    @defaultMarkerLayer.markScreenRange(range, options)
 
   # Public: Constructs a new marker at the given buffer range.
   #
@@ -832,7 +838,7 @@ class DisplayBuffer extends Model
   #
   # Returns a {Number} representing the new marker's ID.
   markBufferRange: (range, options) ->
-    @getMarker(@buffer.markRange(range, options).id)
+    @defaultMarkerLayer.markBufferRange(range, options)
 
   # Public: Constructs a new marker at the given screen position.
   #
@@ -841,7 +847,7 @@ class DisplayBuffer extends Model
   #
   # Returns a {Number} representing the new marker's ID.
   markScreenPosition: (screenPosition, options) ->
-    @markBufferPosition(@bufferPositionForScreenPosition(screenPosition), options)
+    @defaultMarkerLayer.markScreenPosition(screenPosition, options)
 
   # Public: Constructs a new marker at the given buffer position.
   #
@@ -850,14 +856,13 @@ class DisplayBuffer extends Model
   #
   # Returns a {Number} representing the new marker's ID.
   markBufferPosition: (bufferPosition, options) ->
-    @getMarker(@buffer.markPosition(bufferPosition, options).id)
+    @defaultMarkerLayer.markBufferPosition(bufferPosition, options)
 
   # Public: Removes the marker with the given id.
   #
   # id - The {Number} of the ID to remove
   destroyMarker: (id) ->
-    @buffer.destroyMarker(id)
-    delete @markers[id]
+    @defaultMarkerLayer.destroyMarker(id)
 
   # Finds the first marker satisfying the given attributes
   #
