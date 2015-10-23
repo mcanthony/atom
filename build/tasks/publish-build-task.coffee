@@ -86,7 +86,7 @@ getAssets = ->
         continue if grunt.config.get('atom.channel') is 'beta' and squirrelAsset is "#{nupkgName}-#{version}-delta.nupkg"
 
         cp path.join(buildDir, 'installer', squirrelAsset), path.join(buildDir, squirrelAsset)
-        assets.push({assetName: squirrelAsset, sourcePath: assetName})
+        assets.push({assetName: squirrelAsset.replace(/\s+/g, ''), sourcePath: assetName})
       assets
     when 'linux'
       if process.arch is 'ia32'
